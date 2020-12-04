@@ -1,0 +1,83 @@
+#include "Arduino.h"
+#include <SPI.h>
+#include <RF24.h>
+RF24 radio(7, 8);
+int ledpin1 = 3; 
+int ledpin2 = 4;
+int ledpin3 = 5;
+int ledpin4 = 6;
+int mg[4];
+byte addresses[][6] = {"1Node","2Node"};
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("THIS IS THE RECEIVER CODE - YOU NEED THE OTHER ARDUINO TO TRANSMIT");
+  pinMode(ledpin1, OUTPUT);
+  pinMode(ledpin2, OUTPUT);
+  pinMode(ledpin3, OUTPUT);
+  pinMode(ledpin4, OUTPUT);
+  radio.begin();
+
+  radio.setPALevel(RF24_PA_MIN);
+
+  radio.setDataRate(RF24_2MBPS);
+
+  radio.setChannel(124);
+
+  radio.openReadingPipe(1, addresses[1]);
+
+  radio.startListening();
+}
+
+void loop() {
+
+  unsigned char data1;
+  unsigned char data2;
+  unsigned char data3;
+  unsigned char data4;
+
+  if ( radio.available()) {
+
+    while (radio.available()) {
+      radio.read( &mg, sizeof(mg));
+      data1=mg[0];
+      data2=mg[1];
+      data3=mg[2];
+      data4=mg[3];
+    }
+    radio.startListening();
+   digitalWrite(ledpin1, LOW);
+   digitalWrite(ledpin2, LOW);
+   digitalWrite(ledpin3, LOW);
+   digitalWrite(ledpin4, LOW);
+
+   if (data1 == 0) {
+    digitalWrite(ledpin1, HIGH);
+   }
+   else { digitalWrite(ledpin1,LOW); }
+
+    if (data2 == 0) {
+    digitalWrite(ledpin2, HIGH);
+   }
+   else { digitalWrite(ledpin2,LOW); }
+
+    if (data3 == 0) {
+    digitalWrite(ledpin3, HIGH);
+   }
+   else { digitalWrite(ledpin3,LOW); }
+
+       if (data4 == 0) {
+    digitalWrite(ledpin4, HIGH);
+   }
+   else { digitalWrite(ledpin4,LOW); }
+
+    Serial.println("Sent response ");
+    Serial.println(data1);
+    Serial.println("");
+    Serial.println(data2);
+    Serial.println("");
+    Serial.println(data3);
+    Serial.println("");
+    Serial.println(data4);
+  }
+}
